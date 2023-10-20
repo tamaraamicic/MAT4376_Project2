@@ -12,10 +12,10 @@ traindata = "train_data.csv" |>
 		)
 	) |>
 	mutate(
-		ExpiredHospital = ExpiredHospital |>
+		died_at_hospital = ExpiredHospital |>
 			factor(levels = c("0", "1")),
-		LOSgroupNum = LOSgroupNum |>
-			as.factor()
+		LOSgroupNum = NULL, # remove this column; LOSgroupNum is determined completely by LOSdays
+		.keep = "unused"
 	)
 
 summary(traindata)
@@ -30,7 +30,7 @@ ggplot(
 	data = maxedout
 ) + geom_violin(
 	mapping = aes(
-		x = ExpiredHospital,
+		x = died_at_hospital,
 		y = LOSdays
 	)
 )
@@ -51,10 +51,4 @@ ggplot(
 		x = admit_type,
 		y = LOSdays
 	)
-)
-
-ggplot(
-	data = traindata
-) + geom_freqpoly(
-	mapping = aes()
 )
