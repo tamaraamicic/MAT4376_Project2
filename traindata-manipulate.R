@@ -4,13 +4,21 @@ library(tidyverse)
 "dplyr" |>
 	conflict_prefer_all(quiet = TRUE)
 
-traindata = "train_data.csv" |>
+traindata_ids = "train_data.csv" |>
+	read_csv() |>
+	pull(hadm_id)
+mimic = "mimic3d.csv" |>
 	read_csv() |>
 	mutate(
 		across(
 			.cols = where(is.character),
 			.fns = as.factor
 		)
+	) |>
+	get_dummies(
+		cols = AdmitProcedure,
+		prefix = TRUE,
+		prefix_sep = "_"
 	) |>
 	select(!LOSgroupNum) |> # remove: determined completely by LOSdays
 	mutate(
@@ -300,22 +308,11 @@ traindata = "train_data.csv" |>
 		.keep = "unused",
 		.after = "marital_status_widowed"
 	)
-
-newborn = traindata |> # split dataset for investigation purposes
-	filter(admit_type_newborn == 1) |>
-	get_dummies(
-		cols = AdmitProcedure,
-		prefix = TRUE,
-		prefix_sep = "_"
-	)
-traindata = traindata |>
-	get_dummies(
-		cols = AdmitProcedure,
-		prefix = TRUE,
-		prefix_sep = "_"
-	)
-
-newborn |>
-	fwrite(file = "./transformed_train_data_newborn.csv")
+traindata = mimic |>
+	filter(hadm_id %in% traindata_ids)
+testdata = mimic |>
+	filter(hadm_id %notin% traindata_ids)
 traindata |>
 	fwrite(file = "./transformed_train_data.csv")
+testdata |>
+	fwrite(file = "./transformed_test_data.csv")
