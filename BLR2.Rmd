@@ -1,0 +1,68 @@
+---
+title: "BLR2"
+author: "Tanner Giddings"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+```{r}
+suppressPackageStartupMessages(library(mlbench))
+suppressPackageStartupMessages(library(rstanarm))
+suppressPackageStartupMessages(library(bayestestR))
+suppressPackageStartupMessages(library(bayesplot))
+suppressPackageStartupMessages(library(insight))
+suppressPackageStartupMessages(library(broom))
+```
+
+```{r}
+data <- read.csv('mimic3d.csv')
+data$logLOSdays <- log(data$LOSdays + 1)
+data_subset <- subset(data, select=c(gender, age, admit_location, religion, marital_status, ethnicity, ExpiredHospital, logLOSdays, admit_type))
+```
+
+```{r}
+bayes_model <- stan_glm(logLOSdays ~ age * admit_type + gender + admit_location + religion + marital_status + ethnicity + ExpiredHospital, data=data_subset, seed=11)
+```
+
+```{r}
+describe_posterior(bayes_model)
+```
+
+```{r}
+mcmc_dens(bayes_model, pars="age") + vline_at(6.32e-03, col="red")
+```
+
+```{r}
+#The default for admit type is ELECTIVE
+mcmc_dens(bayes_model, pars="admit_typeEMERGENCY") + vline_at(0.43, col="red")
+mcmc_dens(bayes_model, pars="admit_typeNEWBORN") + vline_at(0.19, col="red")
+mcmc_dens(bayes_model, pars="admit_typeURGENT") + vline_at(0.45, col="red")
+```
+
+```{r}
+mcmc_dens(bayes_model, pars="admit_locationPHYS REFERRAL/NORMAL DELI") + vline_at(0.47, col="red")
+mcmc_dens(bayes_model, pars="admit_locationTRANSFER FROM HOSP/EXTRAM") + vline_at(0.46, col="red")
+mcmc_dens(bayes_model, pars="admit_locationTRANSFER FROM OTHER HEALT") + vline_at(0.99, col="red")
+```
+
+```{r}
+mcmc_dens(bayes_model, pars="religionNOT SPECIFIED") + vline_at(-0.22, col="red")
+mcmc_dens(bayes_model, pars="religionUNOBTAINABLE") + vline_at(-0.29, col="red")
+```
+
+```{r}
+mcmc_dens(bayes_model, pars="ethnicityASIAN - FILIPINO") + vline_at(-0.15, col="red")
+mcmc_dens(bayes_model, pars="ethnicityCARIBBEAN ISLAND") + vline_at(-0.61, col="red")
+```
+
+```{r}
+mcmc_dens(bayes_model, pars="ExpiredHospital") + vline_at(-0.21, col="red")
+```
+
+```{r}
+describe_posterior(bayes_model)
+```
+
+```{r}
+```
+
