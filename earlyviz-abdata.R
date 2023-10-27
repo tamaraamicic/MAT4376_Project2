@@ -46,14 +46,37 @@ ggplot(
 		size = total
 	)
 ) + scale_size_area(
-	max_size = 50,
+	max_size = 40,
 	guide = NULL
+) + scale_colour_viridis_c(
+	begin = 0.25
 ) + theme_classic() + labs(
 	title = "Store membership signup rates",
-	subtitle = "by landing page and treatment/control"
+	subtitle = "by landing page and website used",
+	colour = "signup rate"
+) + scale_x_discrete(
+	name = "",
+	limits = c("old_page", "new_page"),
+	labels = c(
+		"old_page" = "used old site",
+		"new_page" = "used new site"
+	)
+) + scale_y_discrete(
+	name = "",
+	limits = c("treatment", "control"),
+	labels = c(
+		"control" = "old\nlanding\npage",
+		"treatment" = "new\nlanding\npage"
+	)
 ) + theme(
 	plot.title = element_text(size = rel(2)),
 	axis.line = element_blank(),
-	axis.ticks = element_blank(),
-	axis.title = element_blank()
+	axis.ticks = element_blank()
+) + geom_text(
+	mapping = aes(
+		x = landing_page,
+		y = group,
+		label = total
+	),
+	nudge_y = 0.175
 )
